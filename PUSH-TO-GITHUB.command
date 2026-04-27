@@ -22,7 +22,7 @@ git config user.email "jax5635@gmail.com"
 git config user.name "Jackie Douma"
 
 git add .
-git commit -m "Add disclaimer modal + @elite.nurse.jackie handle"
+git commit -m "Add Stripe payment links for all 4 products"
 git branch -M main
 git push -u origin main
 
