@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Purchase Notice · Elite Nurse Jackie</title>
+  <title>Before You Continue · Elite Nurse Jackie</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
 
@@ -38,10 +38,7 @@
       margin-bottom: 1.5rem;
     }
 
-    .icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
+    .icon { font-size: 2.5rem; margin-bottom: 1rem; }
 
     h1 {
       font-family: 'DM Serif Display', serif;
@@ -65,12 +62,20 @@
     }
 
     .notice-box {
-      background: #FDF8F4;
-      border: 1.5px solid #C9908C;
       border-radius: 14px;
       padding: 1.25rem 1.5rem;
       margin-bottom: 1.5rem;
       text-align: left;
+    }
+
+    .notice-box.paid {
+      background: #FDF8F4;
+      border: 1.5px solid #C9908C;
+    }
+
+    .notice-box.free {
+      background: #F0F5F0;
+      border: 1.5px solid #7FA882;
     }
 
     .notice-box h2 {
@@ -78,9 +83,11 @@
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #C9908C;
       margin-bottom: 0.75rem;
     }
+
+    .notice-box.paid h2 { color: #C9908C; }
+    .notice-box.free h2 { color: #7FA882; }
 
     .notice-box ul {
       list-style: none;
@@ -97,13 +104,8 @@
       line-height: 1.5;
     }
 
-    .notice-box li::before {
-      content: '·';
-      position: absolute;
-      left: 0.4rem;
-      color: #C9908C;
-      font-weight: 700;
-    }
+    .notice-box.paid li::before { content: '·'; position: absolute; left: 0.4rem; color: #C9908C; font-weight: 700; }
+    .notice-box.free li::before { content: '·'; position: absolute; left: 0.4rem; color: #7FA882; font-weight: 700; }
 
     .small {
       font-size: 0.78rem;
@@ -129,10 +131,7 @@
       margin-bottom: 0.75rem;
     }
 
-    .btn-accept:hover {
-      background: #6a9470;
-      transform: translateY(-1px);
-    }
+    .btn-accept:hover { background: #6a9470; transform: translateY(-1px); }
 
     .btn-back {
       display: block;
@@ -149,58 +148,68 @@
       text-decoration: none;
     }
 
-    .btn-back:hover {
-      border-color: #aaa;
-      color: #555;
-    }
+    .btn-back:hover { border-color: #aaa; color: #555; }
 
-    .footer-note {
-      margin-top: 1.5rem;
-      font-size: 0.72rem;
-      color: #bbb;
-    }
+    .footer-note { margin-top: 1.5rem; font-size: 0.72rem; color: #bbb; }
   </style>
 </head>
 <body>
-
 <div class="card">
   <div class="logo">Elite Nurse Jackie · Sage Era</div>
-  <div class="icon">📋</div>
-  <h1>Before you purchase</h1>
+  <div class="icon" id="pageIcon">📋</div>
+  <h1 id="pageTitle">Before you continue</h1>
+  <div class="product-name" id="productLabel">Digital Resource</div>
 
-  <div class="product-name" id="productLabel">Digital Product</div>
+  <!-- FREE notice -->
+  <div class="notice-box free" id="freeNotice" style="display:none;">
+    <h2>🌿 Free Resource — Please Note</h2>
+    <ul>
+      <li>This is a <strong>free digital resource</strong> — no purchase required.</li>
+      <li>Content is for <strong>educational purposes only</strong> and does not constitute medical advice.</li>
+      <li>Always consult a qualified healthcare professional for personal health decisions.</li>
+      <li>Please do not redistribute or share the file commercially.</li>
+    </ul>
+  </div>
 
-  <div class="notice-box">
+  <!-- PAID notice -->
+  <div class="notice-box paid" id="paidNotice" style="display:none;">
     <h2>⚠️ Important — Please Read</h2>
     <ul>
-      <li>This is a <strong>digital download</strong> — you will receive instant access after payment.</li>
-      <li><strong>All sales are final.</strong> No refunds or exchanges once the file has been accessed or downloaded.</li>
-      <li>This product is for <strong>personal use only</strong> — not for resale or redistribution.</li>
+      <li>This is a <strong>digital download</strong> — you receive instant access after payment.</li>
+      <li><strong>All sales are final.</strong> No refunds once the file has been accessed or downloaded.</li>
+      <li>For <strong>personal use only</strong> — not for resale or redistribution.</li>
       <li>Content is for educational purposes only and does not constitute medical advice.</li>
     </ul>
   </div>
 
-  <p class="small">
-    By clicking "I Accept & Proceed to Payment" you confirm you have read and agree to these terms.
-    If you have any questions before purchasing, email
-    <a href="mailto:sage.era.love@gmail.com" style="color:#7FA882;">sage.era.love@gmail.com</a>
-  </p>
+  <p class="small" id="pageNote"></p>
 
-  <a class="btn-accept" id="proceedBtn" href="#">
-    I Accept &amp; Proceed to Payment →
-  </a>
+  <a class="btn-accept" id="proceedBtn" href="#">I Understand — Continue →</a>
   <a class="btn-back" href="javascript:history.back()">← Go Back</a>
 
   <p class="footer-note">© 2026 Sage Era Pty Ltd · Jackie Douma RN</p>
 </div>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
+  const params  = new URLSearchParams(window.location.search);
   const redirect = params.get('url');
-  const name = params.get('name');
+  const name     = params.get('name');
+  const type     = params.get('type') || 'paid'; // 'free' or 'paid'
 
-  if (name) {
-    document.getElementById('productLabel').textContent = decodeURIComponent(name);
+  if (name) document.getElementById('productLabel').textContent = decodeURIComponent(name);
+
+  if (type === 'free') {
+    document.getElementById('pageIcon').textContent  = '🌿';
+    document.getElementById('pageTitle').textContent = 'Just before you download';
+    document.getElementById('freeNotice').style.display = 'block';
+    document.getElementById('pageNote').innerHTML =
+      'By downloading you acknowledge this is an educational resource only. Questions? <a href="mailto:sage.era.love@gmail.com" style="color:#7FA882;">sage.era.love@gmail.com</a>';
+    document.getElementById('proceedBtn').textContent = 'I Understand — Download Free PDF →';
+  } else {
+    document.getElementById('paidNotice').style.display = 'block';
+    document.getElementById('pageNote').innerHTML =
+      'By clicking proceed you confirm you have read and agree to these terms. Questions before purchasing? <a href="mailto:sage.era.love@gmail.com" style="color:#7FA882;">sage.era.love@gmail.com</a>';
+    document.getElementById('proceedBtn').textContent = 'I Accept & Proceed to Payment →';
   }
 
   if (redirect) {
@@ -209,6 +218,5 @@
     document.getElementById('proceedBtn').href = 'index.html';
   }
 </script>
-
 </body>
 </html>
