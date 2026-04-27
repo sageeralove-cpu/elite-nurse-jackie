@@ -22,7 +22,7 @@ git config user.email "jax5635@gmail.com"
 git config user.name "Jackie Douma"
 
 git add .
-git commit -m "7-Day Reset Collection — Elite Nurse Jackie x Sage Era"
+git commit -m "Add Google AdSense to landing page"
 git branch -M main
 git push -u origin main
 
