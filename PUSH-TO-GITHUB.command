@@ -22,7 +22,7 @@ git config user.email "jax5635@gmail.com"
 git config user.name "Jackie Douma"
 
 git add .
-git commit -m "Add disclaimer gate to all tracker and dashboard buttons"
+git commit -m "Add thank-you download page for automatic Stripe delivery"
 git branch -M main
 git push -u origin main
 
