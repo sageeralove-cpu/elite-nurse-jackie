@@ -22,7 +22,7 @@ git config user.email "jax5635@gmail.com"
 git config user.name "Jackie Douma"
 
 git add .
-git commit -m "Restructure: free PDFs, paid trackers and dashboards"
+git commit -m "Add disclaimer page for paid product links"
 git branch -M main
 git push -u origin main
 

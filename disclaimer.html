@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Purchase Notice · Elite Nurse Jackie</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #FAFAF5;
+      color: #2C2C2C;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: #7FA882;
+      letter-spacing: 0.04em;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.55rem;
+      color: #2C2C2C;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .product-name {
+      display: inline-block;
+      background: #f0f5f0;
+      color: #7FA882;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 50px;
+      margin-bottom: 1.5rem;
+    }
+
+    .notice-box {
+      background: #FDF8F4;
+      border: 1.5px solid #C9908C;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .notice-box h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #C9908C;
+      margin-bottom: 0.75rem;
+    }
+
+    .notice-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .notice-box li {
+      font-size: 0.9rem;
+      color: #2C2C2C;
+      padding-left: 1.4rem;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .notice-box li::before {
+      content: '·';
+      position: absolute;
+      left: 0.4rem;
+      color: #C9908C;
+      font-weight: 700;
+    }
+
+    .small {
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .btn-accept {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background: #7FA882;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-accept:hover {
+      background: #6a9470;
+      transform: translateY(-1px);
+    }
+
+    .btn-back {
+      display: block;
+      width: 100%;
+      padding: 0.85rem;
+      background: transparent;
+      color: #888;
+      border: 1.5px solid #ddd;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-back:hover {
+      border-color: #aaa;
+      color: #555;
+    }
+
+    .footer-note {
+      margin-top: 1.5rem;
+      font-size: 0.72rem;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">Elite Nurse Jackie · Sage Era</div>
+  <div class="icon">📋</div>
+  <h1>Before you purchase</h1>
+
+  <div class="product-name" id="productLabel">Digital Product</div>
+
+  <div class="notice-box">
+    <h2>⚠️ Important — Please Read</h2>
+    <ul>
+      <li>This is a <strong>digital download</strong> — you will receive instant access after payment.</li>
+      <li><strong>All sales are final.</strong> No refunds or exchanges once the file has been accessed or downloaded.</li>
+      <li>This product is for <strong>personal use only</strong> — not for resale or redistribution.</li>
+      <li>Content is for educational purposes only and does not constitute medical advice.</li>
+    </ul>
+  </div>
+
+  <p class="small">
+    By clicking "I Accept & Proceed to Payment" you confirm you have read and agree to these terms.
+    If you have any questions before purchasing, email
+    <a href="mailto:sage.era.love@gmail.com" style="color:#7FA882;">sage.era.love@gmail.com</a>
+  </p>
+
+  <a class="btn-accept" id="proceedBtn" href="#">
+    I Accept &amp; Proceed to Payment →
+  </a>
+  <a class="btn-back" href="javascript:history.back()">← Go Back</a>
+
+  <p class="footer-note">© 2026 Sage Era Pty Ltd · Jackie Douma RN</p>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const redirect = params.get('url');
+  const name = params.get('name');
+
+  if (name) {
+    document.getElementById('productLabel').textContent = decodeURIComponent(name);
+  }
+
+  if (redirect) {
+    document.getElementById('proceedBtn').href = decodeURIComponent(redirect);
+  } else {
+    document.getElementById('proceedBtn').href = 'index.html';
+  }
+</script>
+
+</body>
+</html>
