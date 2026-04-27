@@ -151,6 +151,65 @@
       50% { transform: translateY(6px); }
     }
 
+    /* ── Disclaimer Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(44,44,44,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--ivory);
+      border-radius: 20px;
+      max-width: 480px; width: 90%;
+      padding: 40px 36px 32px;
+      box-shadow: 0 24px 64px rgba(44,44,44,0.18);
+      position: relative;
+      animation: modal-in 0.22s ease;
+    }
+    @keyframes modal-in {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-icon {
+      width: 44px; height: 44px;
+      background: var(--sage-light);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 20px;
+    }
+    .modal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; color: var(--charcoal);
+      margin-bottom: 12px;
+    }
+    .modal-body {
+      font-size: 13px; color: var(--warm-gray);
+      line-height: 1.7; margin-bottom: 24px;
+    }
+    .modal-body strong { color: var(--charcoal); }
+    .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .modal-confirm {
+      flex: 1; padding: 11px 20px;
+      background: var(--sage); color: white;
+      border: none; border-radius: 100px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .modal-confirm:hover { background: #6d9770; }
+    .modal-cancel {
+      padding: 11px 20px;
+      background: transparent; color: var(--warm-gray);
+      border: 1.5px solid var(--divider);
+      border-radius: 100px;
+      font-size: 13px; font-weight: 400;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .modal-cancel:hover { border-color: var(--charcoal); color: var(--charcoal); }
+
     /* ── Section ── */
     section {
       padding: 100px 24px;
@@ -346,6 +405,24 @@
 </head>
 <body>
 
+<!-- ── Disclaimer Modal ── -->
+<div class="modal-overlay" id="disclaimerModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-icon">📋</div>
+    <div class="modal-title">Before you continue</div>
+    <div class="modal-body">
+      <strong>Digital products are non-refundable</strong> once accessed or downloaded.<br><br>
+      By continuing, you acknowledge that all sales are final. These resources are provided
+      <strong>for educational purposes only</strong> and do not constitute medical advice.
+      Always consult a qualified healthcare professional for personal health concerns.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-confirm" id="modalConfirm">I understand — continue</button>
+      <button class="modal-cancel" id="modalCancel">Go back</button>
+    </div>
+  </div>
+</div>
+
 <!-- Fluid Background -->
 <canvas id="fluid-bg"></canvas>
 
@@ -517,6 +594,7 @@
       <span class="badge">ICU Night Shift RN</span>
       <span class="badge">Sage Era Pty Ltd</span>
       <span class="badge">@SageEraLove</span>
+      <span class="badge">@elite.nurse.jackie</span>
       <span class="badge">@jax24fit4life</span>
       <span class="badge">Evidence-Based</span>
     </div>
@@ -546,6 +624,7 @@
     <div class="footer-links">
       <a href="https://www.etsy.com/shop/SageEraCo" target="_blank">Etsy · SageEraCo</a>
       <a href="https://instagram.com/SageEraLove" target="_blank">Instagram · @SageEraLove</a>
+      <a href="https://instagram.com/elite.nurse.jackie" target="_blank">Instagram · @elite.nurse.jackie</a>
       <a href="https://instagram.com/jax24fit4life" target="_blank">Instagram · @jax24fit4life</a>
     </div>
     <div style="font-size:11px; margin-top:8px;">
@@ -596,6 +675,39 @@ function drawBlobs() {
 
 window.addEventListener('resize', () => { resize(); initBlobs(); });
 resize(); initBlobs(); drawBlobs();
+
+// ── Disclaimer Modal ──
+const modal   = document.getElementById('disclaimerModal');
+const confirm = document.getElementById('modalConfirm');
+const cancel  = document.getElementById('modalCancel');
+let pendingHref = null;
+
+// Intercept any link going to /pdfs/ or /dashboards/
+document.addEventListener('click', function(e) {
+  const link = e.target.closest('a');
+  if (!link) return;
+  const href = link.getAttribute('href') || '';
+  if (href.includes('pdfs/') || href.includes('dashboards/')) {
+    e.preventDefault();
+    pendingHref = link.href || href;
+    modal.classList.add('open');
+  }
+});
+
+confirm.addEventListener('click', () => {
+  modal.classList.remove('open');
+  if (pendingHref) { window.open(pendingHref, '_blank'); pendingHref = null; }
+});
+
+cancel.addEventListener('click', () => {
+  modal.classList.remove('open');
+  pendingHref = null;
+});
+
+// Close on overlay click
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) { modal.classList.remove('open'); pendingHref = null; }
+});
 </script>
 </body>
 </html>
