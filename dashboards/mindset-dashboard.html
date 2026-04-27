@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>7-Day Mindset Reset Dashboard | Elite Nurse Jackie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ivory: #FAFAF5;
+  --charcoal: #2C2C2C;
+  --warm-gray: #8A8A8A;
+  --divider: #E0DDD8;
+  --white: #ffffff;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--ivory);
+  color: var(--charcoal);
+  min-height: 100vh;
+}
+#fluid-bg {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+}
+.page { position:relative; z-index:1; }
+
+/* Nav */
+.top-bar {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 32px;
+  background:rgba(250,250,245,0.88); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--divider);
+}
+.top-brand { font-size:13px; font-weight:500; }
+.top-sub { font-size:11px; color:var(--warm-gray); }
+.back-link {
+  font-size:12px; color:var(--warm-gray); text-decoration:none;
+  display:flex; align-items:center; gap:6px;
+  transition:color 0.2s;
+}
+.back-link:hover { color:var(--charcoal); }
+
+/* Hero */
+.hero {
+  padding: 110px 24px 40px;
+  text-align:center;
+  max-width:720px; margin:0 auto;
+}
+.hero-badge {
+  display:inline-block;
+  font-size:10px; font-weight:600; letter-spacing:0.14em;
+  text-transform:uppercase; padding:5px 14px; border-radius:100px;
+  margin-bottom:20px;
+}
+.hero-title {
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(34px,6vw,60px);
+  line-height:1.1; margin-bottom:16px;
+}
+.hero-sub {
+  font-size:15px; color:var(--warm-gray);
+  line-height:1.65; font-weight:300; margin-bottom:32px;
+}
+
+/* Progress Ring */
+.progress-wrap {
+  display:flex; align-items:center; justify-content:center; gap:20px;
+  margin-bottom:40px; flex-wrap:wrap;
+}
+.progress-ring-wrap { position:relative; width:100px; height:100px; }
+.progress-ring-wrap svg { transform:rotate(-90deg); }
+.ring-center {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.ring-pct { font-size:20px; font-weight:600; }
+.ring-label { font-size:9px; color:var(--warm-gray); text-transform:uppercase; letter-spacing:0.08em; }
+.progress-stats {
+  display:flex; gap:24px; flex-wrap:wrap;
+}
+.stat { text-align:center; }
+.stat-num { font-size:28px; font-weight:600; line-height:1; }
+.stat-lbl { font-size:10px; color:var(--warm-gray); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px; }
+
+/* Day Cards */
+.days-section {
+  max-width:760px; margin:0 auto;
+  padding:0 24px 80px;
+  display:flex; flex-direction:column; gap:16px;
+}
+.day-card {
+  background:white;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+  transition:box-shadow 0.2s;
+}
+.day-card:hover { box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+.day-header {
+  display:flex; align-items:center; gap:0;
+  cursor:pointer; user-select:none;
+}
+.day-badge {
+  width:72px; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:20px 0;
+  color:white; font-weight:700;
+}
+.day-badge .d-label { font-size:8px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.8; }
+.day-badge .d-num { font-size:26px; line-height:1; }
+.day-info {
+  flex:1; padding:18px 20px;
+}
+.day-title { font-weight:600; font-size:16px; margin-bottom:4px; }
+.day-subtitle { font-size:12px; color:var(--warm-gray); }
+.day-meta {
+  display:flex; align-items:center; gap:8px; padding:0 20px;
+  flex-shrink:0;
+}
+.day-check-count { font-size:11px; color:var(--warm-gray); }
+.day-chevron {
+  width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--ivory); transition:transform 0.25s, background 0.2s;
+  flex-shrink:0;
+}
+.day-card.open .day-chevron { transform:rotate(180deg); }
+
+.day-body {
+  display:none; padding:4px 24px 24px;
+  border-top:1px solid var(--divider);
+}
+.day-card.open .day-body { display:block; }
+
+.day-overview {
+  font-size:13px; color:var(--warm-gray); line-height:1.65;
+  font-weight:300; margin-bottom:20px; padding-top:16px;
+}
+
+/* Checklist */
+.checklist { list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.check-item {
+  display:flex; align-items:flex-start; gap:12px;
+  cursor:pointer;
+}
+.check-item input[type=checkbox] { display:none; }
+.check-box {
+  width:20px; height:20px; border-radius:6px;
+  border:1.5px solid var(--divider); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:1px; transition:all 0.15s;
+}
+.check-item.done .check-box {
+  border-color:transparent;
+}
+.check-item.done .check-box::after {
+  content:'✓'; font-size:12px; color:white; font-weight:700;
+}
+.check-text {
+  font-size:13px; line-height:1.55; transition:color 0.15s;
+}
+.check-item.done .check-text { color:var(--warm-gray); text-decoration:line-through; }
+
+/* Nurse tip */
+.nurse-tip {
+  border-radius:10px; padding:14px 16px;
+  font-size:12px; line-height:1.6; font-style:italic;
+  margin-bottom:16px;
+}
+
+/* Journal */
+.journal-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+.journal-area {
+  width:100%; border:1px solid var(--divider); border-radius:10px;
+  padding:12px 14px; font-size:13px; font-family:inherit;
+  color:var(--charcoal); background:var(--ivory); resize:vertical;
+  min-height:80px; transition:border-color 0.2s; outline:none;
+}
+.journal-area:focus { border-color:#aaa; }
+
+/* Reset btn */
+.reset-all-btn {
+  display:block; margin:0 auto 32px; padding:10px 24px;
+  border:1px solid var(--divider); border-radius:100px;
+  background:none; font-family:inherit; font-size:12px; color:var(--warm-gray);
+  cursor:pointer; transition:all 0.2s;
+}
+.reset-all-btn:hover { border-color:var(--charcoal); color:var(--charcoal); }
+
+/* Completion Banner */
+.complete-banner {
+  display:none; text-align:center;
+  padding:32px 24px; margin:0 24px 40px;
+  border-radius:20px;
+  font-family:'DM Serif Display',serif;
+  font-size:22px; color:white;
+  max-width:760px; margin-left:auto; margin-right:auto;
+}
+.complete-banner.show { display:block; }
+
+@media(max-width:600px){
+  .top-bar { padding:14px 16px; }
+  .days-section { padding:0 12px 60px; }
+  .day-body { padding:4px 16px 20px; }
+}
+
+.hero-badge { background:#7FA8821A; color:#7FA882; }
+.progress-circle { stroke:#7FA882; }
+.ring-pct { color:#7FA882; }
+.stat-num { color:#7FA882; }
+</style>
+</head>
+<body>
+<canvas id="fluid-bg"></canvas>
+<div class="page">
+
+<div class="top-bar">
+  <div>
+    <div class="top-brand">7-Day Mindset Reset</div>
+    <div class="top-sub">Elite Nurse Jackie · Sage Era</div>
+  </div>
+  <a href="../index.html" class="back-link">← All Resets</a>
+</div>
+
+<div class="hero">
+  <div class="hero-badge">◈ Reset 01 · Mindset</div>
+  <h1 class="hero-title">7-Day<br>Mindset Reset</h1>
+  <p class="hero-sub">
+    Rewire negative thought patterns and rebuild cognitive resilience
+    through CBT, ACT, and mindfulness-based practices.
+  </p>
+
+  <div class="progress-wrap">
+    <div class="progress-ring-wrap">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#E0DDD8" stroke-width="6"/>
+        <circle class="progress-circle" cx="50" cy="50" r="40"
+          fill="none" stroke-width="6" stroke-linecap="round"
+          style="stroke-dasharray:251;stroke-dashoffset:251;transition:stroke-dashoffset 0.5s"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-pct">0%</div>
+        <div class="ring-label">done</div>
+      </div>
+    </div>
+    <div class="progress-stats">
+      <div class="stat"><div class="stat-num stat-done">0</div><div class="stat-lbl">Practices<br>completed</div></div>
+      <div class="stat"><div class="stat-num" style="color:var(--warm-gray)">7</div><div class="stat-lbl">Days<br>total</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="complete-banner" style="background:#7FA882;">
+  🌿 You completed the 7-Day Mindset Reset!<br>
+  <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;opacity:0.9;">
+    Rest in your growth. Come back whenever you need to reset.
+  </span>
+</div>
+
+<div class="days-section">
+
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">1</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Awareness Without Judgement</div>
+      <div class="day-subtitle">Cognitive defusion + thought watching</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/4</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Today is about noticing your thoughts like passing clouds — not engaging, not fighting. Simply label each one: 'I notice I'm having the thought that...' This single practice reduces amygdala reactivity within seconds.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d1_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Sit quietly for 5 minutes. Watch your thoughts — don't engage, just observe.</span>
+        </li>
+<li class="check-item" data-id="mindset_d1_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Each time a negative thought arises, say silently: 'I notice I'm having the thought that...'</span>
+        </li>
+<li class="check-item" data-id="mindset_d1_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Evening journal (10 min): Write your 3 most frequent negative thought themes.</span>
+        </li>
+<li class="check-item" data-id="mindset_d1_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Read your entries with curiosity, not self-criticism.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> After a brutal shift, your brain replays every difficult moment. Defuse from them: 'My brain is trying to protect me. I can thank it and let it go.'
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d1_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">2</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Gratitude & Neuroplasticity</div>
+      <div class="day-subtitle">Rewiring attentional bias toward the positive</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/4</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Gratitude activates the medial prefrontal cortex and releases dopamine and serotonin — creating self-reinforcing positive neural pathways. This is about specificity: not 'my health' but 'the way my colleague brought me tea without being asked'.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d2_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Write 3 specific gratitudes — granular and concrete, not generic.</span>
+        </li>
+<li class="check-item" data-id="mindset_d2_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Send a 2-sentence thank-you message to one colleague or person in your life.</span>
+        </li>
+<li class="check-item" data-id="mindset_d2_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Notice 5 sensory pleasures throughout your day (coffee, morning light, a comfortable chair).</span>
+        </li>
+<li class="check-item" data-id="mindset_d2_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Evening: What went right today, even minimally?</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> Gratitude on night shift can feel hollow. Try 'micro-gratitudes' — the peaceful handover, a moment to sit. Small moments count enormously.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d2_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">3</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Values Clarification</div>
+      <div class="day-subtitle">Reconnecting with your purpose</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/4</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">ACT research shows psychological flexibility — acting in alignment with your values even under distress — is the strongest predictor of burnout prevention in healthcare. Today reconnects you to why you do what you do.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d3_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Values inventory (15 min): Choose your top 5 from: compassion, growth, family, freedom, integrity, creativity, service, courage, health, connection.</span>
+        </li>
+<li class="check-item" data-id="mindset_d3_c1">
+          <div class="check-box"></div>
+          <span class="check-text">For each value, write: 'This value matters to me because...'</span>
+        </li>
+<li class="check-item" data-id="mindset_d3_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Identify one area most aligned with your values — and one most disconnected.</span>
+        </li>
+<li class="check-item" data-id="mindset_d3_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Write a 3-sentence personal mission statement.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> Moral distress arises when you're forced to act against your values. Naming them gives language to that pain — the first step to addressing it.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d3_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">4</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Self-Compassion</div>
+      <div class="day-subtitle">Turning care inward</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/4</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Dr Kristin Neff's research: self-compassion is strongly associated with reduced burnout and increased resilience. Nurses score exceptionally low on self-compassion despite high scores for others. Today that changes.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d4_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Self-compassion break (5 min): Hand on heart — 'This is a moment of suffering. Suffering is a part of life. May I be kind to myself in this moment.'</span>
+        </li>
+<li class="check-item" data-id="mindset_d4_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Write a letter to yourself from the perspective of a deeply caring, wise friend.</span>
+        </li>
+<li class="check-item" data-id="mindset_d4_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Identify your harshest inner critic phrase and rewrite it with compassion.</span>
+        </li>
+<li class="check-item" data-id="mindset_d4_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Practice a 'self-compassion pause' each time shame or self-criticism arises.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> Perfectionism keeps patients safe — but applied to yourself, it is corrosive. You are not your worst shift.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d4_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">5</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Cognitive Reframing</div>
+      <div class="day-subtitle">CBT core — accurate thinking, not positive thinking</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Identify cognitive distortions — catastrophising, mind-reading, all-or-nothing thinking — and replace them with accurate, balanced perspectives. This is not toxic positivity. It is precision thinking.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d5_c0">
+          <div class="check-box"></div>
+          <span class="check-text">List your top 3 recurring negative thoughts from Day 1.</span>
+        </li>
+<li class="check-item" data-id="mindset_d5_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Identify the distortion type for each (catastrophising, personalising, mind-reading...).</span>
+        </li>
+<li class="check-item" data-id="mindset_d5_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Apply the ABCDE model: Adversity → Belief → Consequence → Dispute → new Effect.</span>
+        </li>
+<li class="check-item" data-id="mindset_d5_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Write 3 reframe statements — honest, balanced alternatives.</span>
+        </li>
+<li class="check-item" data-id="mindset_d5_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Catch and reframe one thought in real time today.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> Common nursing distortion: 'If I miss one thing, something terrible will happen.' Reframe: 'I work in a team with multiple safety nets. I am thorough and supported.'
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d5_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">6</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Intention Setting & Visualisation</div>
+      <div class="day-subtitle">Creating an internal locus of control</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/4</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Mental rehearsal activates the same neural pathways as physical action. Setting clear daily intentions — rather than reacting to whatever the shift brings — creates an internal locus of control that buffers against stress.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d6_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Morning intention (3 min): 'Today, I intend to bring _____ to my work. I will honour my own needs by _____.'</span>
+        </li>
+<li class="check-item" data-id="mindset_d6_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Visualise (5 min): See yourself moving through a difficult moment today with calm competence.</span>
+        </li>
+<li class="check-item" data-id="mindset_d6_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Identify one boundary you want to set or reinforce this week.</span>
+        </li>
+<li class="check-item" data-id="mindset_d6_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Create a simple shutdown ritual: 3 deep breaths, wash hands intentionally, say 'I have done enough for today.'</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> Try intention setting in the car before entering the building. It takes 90 seconds and changes everything about how you enter.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d6_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#7FA882; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">7</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Integration & Commitment</div>
+      <div class="day-subtitle">Building your permanent practice</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">New neural pathways require approximately 60–90 days of practice to become default. Today you design your maintenance protocol — making these shifts part of who you are, not just a 7-day experiment.</p>
+    <ul class="checklist"><li class="check-item" data-id="mindset_d7_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Review your journals from Days 1–6. What has shifted?</span>
+        </li>
+<li class="check-item" data-id="mindset_d7_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Select 2–3 practices that resonated most — these become your daily anchors.</span>
+        </li>
+<li class="check-item" data-id="mindset_d7_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Write a 'Future Self' letter: Who are you in 6 months if you keep this up?</span>
+        </li>
+<li class="check-item" data-id="mindset_d7_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Share this guide with one colleague who needs it.</span>
+        </li>
+<li class="check-item" data-id="mindset_d7_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Schedule your next 7-Day Mindset Reset — one month from today.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#7FA88218; color:#7FA882;">
+      🩺 <b>Nurse Tip:</b> Real change is non-linear. There will be hard shifts and days when none of this is accessible. That is not failure — it is being human and being a nurse.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="mindset_d7_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<button class="reset-all-btn">Clear all progress</button>
+</div>
+
+</div>
+<script>
+
+// ── localStorage helpers ──
+const KEY = 'ENJ_mindset_v1';
+function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+
+// ── State ──
+let state = load();
+
+// ── Init checkboxes ──
+document.querySelectorAll('.check-item').forEach(item => {
+  const id = item.dataset.id;
+  if(state[id]) item.classList.add('done');
+
+  item.addEventListener('click', () => {
+    item.classList.toggle('done');
+    state[id] = item.classList.contains('done');
+    save(state);
+    updateProgress();
+  });
+});
+
+// ── Init journals ──
+document.querySelectorAll('.journal-area').forEach(ta => {
+  const id = ta.dataset.id;
+  if(state[id]) ta.value = state[id];
+  ta.addEventListener('input', () => { state[id] = ta.value; save(state); });
+});
+
+// ── Day accordion ──
+document.querySelectorAll('.day-header').forEach(h => {
+  h.addEventListener('click', () => {
+    const card = h.closest('.day-card');
+    card.classList.toggle('open');
+  });
+});
+
+// ── Open first card by default ──
+const first = document.querySelector('.day-card');
+if(first) first.classList.add('open');
+
+// ── Progress ──
+function updateProgress(){
+  const allBoxes = document.querySelectorAll('.check-item');
+  const done = document.querySelectorAll('.check-item.done').length;
+  const total = allBoxes.length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+
+  // ring
+  const circle = document.querySelector('.progress-circle');
+  if(circle){
+    const r = parseFloat(circle.getAttribute('r'));
+    const circ = 2*Math.PI*r;
+    circle.style.strokeDasharray = circ;
+    circle.style.strokeDashoffset = circ - (circ * pct/100);
+  }
+  const pctEl = document.querySelector('.ring-pct');
+  if(pctEl) pctEl.textContent = pct+'%';
+
+  const doneEl = document.querySelector('.stat-done');
+  if(doneEl) doneEl.textContent = done;
+
+  // per-day counts
+  document.querySelectorAll('.day-card').forEach(card => {
+    const items = card.querySelectorAll('.check-item');
+    const doneD = card.querySelectorAll('.check-item.done').length;
+    const cc = card.querySelector('.day-check-count');
+    if(cc) cc.textContent = doneD+'/'+items.length;
+    // colour day-badge on completion
+    if(doneD === items.length && items.length > 0){
+      card.querySelector('.day-badge').style.opacity = '1';
+    } else {
+      card.querySelector('.day-badge').style.opacity = '0.55';
+    }
+  });
+
+  // completion banner
+  const banner = document.querySelector('.complete-banner');
+  if(banner){ banner.classList.toggle('show', pct===100); }
+}
+updateProgress();
+
+// ── Reset ──
+document.querySelector('.reset-all-btn').addEventListener('click', () => {
+  if(!confirm('Clear all progress for this reset?')) return;
+  document.querySelectorAll('.check-item').forEach(i => i.classList.remove('done'));
+  document.querySelectorAll('.journal-area').forEach(t => t.value='');
+  state = {}; save(state); updateProgress();
+});
+
+</script>
+<script>
+
+const canvas = document.getElementById('fluid-bg');
+const ctx = canvas.getContext('2d');
+let W,H,blobs;
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+function initBlobs(){
+  blobs = [
+    {x:W*0.2,y:H*0.3,r:340,dx:0.18,dy:0.12,c:'rgba(127,168,130,0.15)'},
+    {x:W*0.75,y:H*0.2,r:260,dx:-0.13,dy:0.15,c:'rgba(127,168,130,0.10)'},
+    {x:W*0.5,y:H*0.75,r:300,dx:0.10,dy:-0.13,c:'rgba(127,168,130,0.08)'},
+    {x:W*0.85,y:H*0.6,r:180,dx:-0.16,dy:-0.10,c:'rgba(234,242,234,0.20)'},
+  ];
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  blobs.forEach(b=>{
+    const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+    g.addColorStop(0,b.c); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+    b.x+=b.dx; b.y+=b.dy;
+    if(b.x<-b.r||b.x>W+b.r) b.dx*=-1;
+    if(b.y<-b.r||b.y>H+b.r) b.dy*=-1;
+  });
+  requestAnimationFrame(draw);
+}
+window.addEventListener('resize',()=>{resize();initBlobs();});
+resize(); initBlobs(); draw();
+
+</script>
+</body>
+</html>

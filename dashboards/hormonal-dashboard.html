@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>7-Day Hormonal Reset Dashboard | Elite Nurse Jackie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ivory: #FAFAF5;
+  --charcoal: #2C2C2C;
+  --warm-gray: #8A8A8A;
+  --divider: #E0DDD8;
+  --white: #ffffff;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--ivory);
+  color: var(--charcoal);
+  min-height: 100vh;
+}
+#fluid-bg {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+}
+.page { position:relative; z-index:1; }
+
+/* Nav */
+.top-bar {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 32px;
+  background:rgba(250,250,245,0.88); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--divider);
+}
+.top-brand { font-size:13px; font-weight:500; }
+.top-sub { font-size:11px; color:var(--warm-gray); }
+.back-link {
+  font-size:12px; color:var(--warm-gray); text-decoration:none;
+  display:flex; align-items:center; gap:6px;
+  transition:color 0.2s;
+}
+.back-link:hover { color:var(--charcoal); }
+
+/* Hero */
+.hero {
+  padding: 110px 24px 40px;
+  text-align:center;
+  max-width:720px; margin:0 auto;
+}
+.hero-badge {
+  display:inline-block;
+  font-size:10px; font-weight:600; letter-spacing:0.14em;
+  text-transform:uppercase; padding:5px 14px; border-radius:100px;
+  margin-bottom:20px;
+}
+.hero-title {
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(34px,6vw,60px);
+  line-height:1.1; margin-bottom:16px;
+}
+.hero-sub {
+  font-size:15px; color:var(--warm-gray);
+  line-height:1.65; font-weight:300; margin-bottom:32px;
+}
+
+/* Progress Ring */
+.progress-wrap {
+  display:flex; align-items:center; justify-content:center; gap:20px;
+  margin-bottom:40px; flex-wrap:wrap;
+}
+.progress-ring-wrap { position:relative; width:100px; height:100px; }
+.progress-ring-wrap svg { transform:rotate(-90deg); }
+.ring-center {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.ring-pct { font-size:20px; font-weight:600; }
+.ring-label { font-size:9px; color:var(--warm-gray); text-transform:uppercase; letter-spacing:0.08em; }
+.progress-stats {
+  display:flex; gap:24px; flex-wrap:wrap;
+}
+.stat { text-align:center; }
+.stat-num { font-size:28px; font-weight:600; line-height:1; }
+.stat-lbl { font-size:10px; color:var(--warm-gray); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px; }
+
+/* Day Cards */
+.days-section {
+  max-width:760px; margin:0 auto;
+  padding:0 24px 80px;
+  display:flex; flex-direction:column; gap:16px;
+}
+.day-card {
+  background:white;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+  transition:box-shadow 0.2s;
+}
+.day-card:hover { box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+.day-header {
+  display:flex; align-items:center; gap:0;
+  cursor:pointer; user-select:none;
+}
+.day-badge {
+  width:72px; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:20px 0;
+  color:white; font-weight:700;
+}
+.day-badge .d-label { font-size:8px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.8; }
+.day-badge .d-num { font-size:26px; line-height:1; }
+.day-info {
+  flex:1; padding:18px 20px;
+}
+.day-title { font-weight:600; font-size:16px; margin-bottom:4px; }
+.day-subtitle { font-size:12px; color:var(--warm-gray); }
+.day-meta {
+  display:flex; align-items:center; gap:8px; padding:0 20px;
+  flex-shrink:0;
+}
+.day-check-count { font-size:11px; color:var(--warm-gray); }
+.day-chevron {
+  width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--ivory); transition:transform 0.25s, background 0.2s;
+  flex-shrink:0;
+}
+.day-card.open .day-chevron { transform:rotate(180deg); }
+
+.day-body {
+  display:none; padding:4px 24px 24px;
+  border-top:1px solid var(--divider);
+}
+.day-card.open .day-body { display:block; }
+
+.day-overview {
+  font-size:13px; color:var(--warm-gray); line-height:1.65;
+  font-weight:300; margin-bottom:20px; padding-top:16px;
+}
+
+/* Checklist */
+.checklist { list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.check-item {
+  display:flex; align-items:flex-start; gap:12px;
+  cursor:pointer;
+}
+.check-item input[type=checkbox] { display:none; }
+.check-box {
+  width:20px; height:20px; border-radius:6px;
+  border:1.5px solid var(--divider); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:1px; transition:all 0.15s;
+}
+.check-item.done .check-box {
+  border-color:transparent;
+}
+.check-item.done .check-box::after {
+  content:'✓'; font-size:12px; color:white; font-weight:700;
+}
+.check-text {
+  font-size:13px; line-height:1.55; transition:color 0.15s;
+}
+.check-item.done .check-text { color:var(--warm-gray); text-decoration:line-through; }
+
+/* Nurse tip */
+.nurse-tip {
+  border-radius:10px; padding:14px 16px;
+  font-size:12px; line-height:1.6; font-style:italic;
+  margin-bottom:16px;
+}
+
+/* Journal */
+.journal-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+.journal-area {
+  width:100%; border:1px solid var(--divider); border-radius:10px;
+  padding:12px 14px; font-size:13px; font-family:inherit;
+  color:var(--charcoal); background:var(--ivory); resize:vertical;
+  min-height:80px; transition:border-color 0.2s; outline:none;
+}
+.journal-area:focus { border-color:#aaa; }
+
+/* Reset btn */
+.reset-all-btn {
+  display:block; margin:0 auto 32px; padding:10px 24px;
+  border:1px solid var(--divider); border-radius:100px;
+  background:none; font-family:inherit; font-size:12px; color:var(--warm-gray);
+  cursor:pointer; transition:all 0.2s;
+}
+.reset-all-btn:hover { border-color:var(--charcoal); color:var(--charcoal); }
+
+/* Completion Banner */
+.complete-banner {
+  display:none; text-align:center;
+  padding:32px 24px; margin:0 24px 40px;
+  border-radius:20px;
+  font-family:'DM Serif Display',serif;
+  font-size:22px; color:white;
+  max-width:760px; margin-left:auto; margin-right:auto;
+}
+.complete-banner.show { display:block; }
+
+@media(max-width:600px){
+  .top-bar { padding:14px 16px; }
+  .days-section { padding:0 12px 60px; }
+  .day-body { padding:4px 16px 20px; }
+}
+
+.hero-badge { background:#C9908C1A; color:#C9908C; }
+.progress-circle { stroke:#C9908C; }
+.ring-pct { color:#C9908C; }
+.stat-num { color:#C9908C; }
+</style>
+</head>
+<body>
+<canvas id="fluid-bg"></canvas>
+<div class="page">
+
+<div class="top-bar">
+  <div>
+    <div class="top-brand">7-Day Hormonal Reset</div>
+    <div class="top-sub">Elite Nurse Jackie · Sage Era</div>
+  </div>
+  <a href="../index.html" class="back-link">← All Resets</a>
+</div>
+
+<div class="hero">
+  <div class="hero-badge">◎ Reset 02 · Hormonal</div>
+  <h1 class="hero-title">7-Day<br>Hormonal Reset</h1>
+  <p class="hero-sub">
+    Rebalance cortisol, oestrogen, melatonin, and thyroid through
+    targeted nutrition, sleep, movement, and lifestyle medicine.
+  </p>
+
+  <div class="progress-wrap">
+    <div class="progress-ring-wrap">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#E0DDD8" stroke-width="6"/>
+        <circle class="progress-circle" cx="50" cy="50" r="40"
+          fill="none" stroke-width="6" stroke-linecap="round"
+          style="stroke-dasharray:251;stroke-dashoffset:251;transition:stroke-dashoffset 0.5s"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-pct">0%</div>
+        <div class="ring-label">done</div>
+      </div>
+    </div>
+    <div class="progress-stats">
+      <div class="stat"><div class="stat-num stat-done">0</div><div class="stat-lbl">Practices<br>completed</div></div>
+      <div class="stat"><div class="stat-num" style="color:var(--warm-gray)">7</div><div class="stat-lbl">Days<br>total</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="complete-banner" style="background:#C9908C;">
+  🌸 You completed the 7-Day Hormonal Reset!<br>
+  <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;opacity:0.9;">
+    Your body thanks you. Book that GP appointment and keep going.
+  </span>
+</div>
+
+<div class="days-section">
+
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">1</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Cortisol & Blood Sugar Reset</div>
+      <div class="day-subtitle">Light exposure + protein-first morning</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Cortisol follows a natural diurnal rhythm — peaking 30–45 minutes after waking (the Cortisol Awakening Response). Shift work destroys this rhythm. Today anchors it through light and nutrition.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d1_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Expose yourself to bright light within 10 minutes of waking (natural or SAD lamp, 10,000 lux, 20 minutes).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d1_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Eat a protein-rich breakfast within 60 minutes of waking (25–30g protein: eggs, Greek yoghurt, smoked salmon).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d1_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Delay caffeine for 90 minutes after waking — let cortisol peak naturally first.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d1_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Eat every 3–4 hours to prevent reactive hypoglycaemia. No skipped meals today.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d1_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Rate your energy and mood at morning, midday and evening (1–10). This is your hormonal baseline.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> On night shift, your 'morning' is whenever you wake. Apply the same rules: protein first, delay caffeine 90 minutes, open a window or step outside briefly.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d1_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">2</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Sleep & Melatonin Optimisation</div>
+      <div class="day-subtitle">Building your hormonal sleep sanctuary</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Blue light from screens suppresses melatonin by up to 85%. Chronic melatonin disruption in shift workers is associated with metabolic syndrome, depression, and cardiovascular disease. Today builds the foundations.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d2_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Create a sleep blackout environment: blackout curtains, eye mask, white noise or earplugs.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d2_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Begin screen-free wind-down 60 minutes before bed. Use blue-light blocking glasses from 9pm.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d2_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Consider 0.5–3mg melatonin 30 minutes before desired sleep time (consult your GP first).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d2_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Keep bedroom temperature between 16–18°C for optimal sleep onset.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d2_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Consider magnesium glycinate (200–400mg before bed) — supports sleep and progesterone (check with GP).</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> Post-night shift sleep is often the least restorative. Prioritise duration over timing — even 6 hours of true darkness is hormonal medicine.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d2_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">3</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Gut Health & Oestrogen Metabolism</div>
+      <div class="day-subtitle">Feeding your estrobolome</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">The 'estrobolome' — gut bacteria responsible for metabolising oestrogen — is a critical regulator of hormonal balance. Poor gut health causes oestrogen to be reabsorbed rather than excreted, contributing to oestrogen dominance.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d3_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Eat 30g of dietary fibre today: vegetables, legumes, whole grains, 1 tbsp ground flaxseed (daily).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d3_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Add 1–2 servings of fermented foods: kefir, natural yoghurt, kimchi, sauerkraut, or kombucha.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d3_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Reduce or eliminate alcohol for this week — it directly impairs liver oestrogen detoxification.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d3_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Hydrate: aim for 2–2.5L of water. Add electrolytes on long shift days.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d3_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Consider a quality probiotic with Lactobacillus and Bifidobacterium strains.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> Stress-induced gut permeability ('leaky gut') accelerates hormonal disruption. Feed your gut bacteria on every day off.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d3_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">4</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Movement for Hormonal Health</div>
+      <div class="day-subtitle">Zone 2 over HIIT</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">High-intensity exercise raises cortisol — damaging when overlaid on an already elevated baseline. Moderate Zone 2 cardio (60–70% max HR) improves insulin sensitivity, reduces cortisol, and supports thyroid function.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d4_c0">
+          <div class="check-box"></div>
+          <span class="check-text">30 minutes of Zone 2 cardio: brisk walking, light cycling, swimming (you can hold a conversation).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d4_c1">
+          <div class="check-box"></div>
+          <span class="check-text">If energy allows: 2 sets of bodyweight strength exercises — squats, lunges, push-ups (10–15 reps each).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d4_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Avoid HIIT this week if you're in a high-stress period — it will raise cortisol further.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d4_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Stretch for 10 minutes in the evening. Yoga nidra (20-min guided recording) is particularly effective.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d4_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Walk outside for at least 20 minutes — natural light + gentle movement = powerful hormonal combination.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> A 12-hour night shift is physical exercise. On shift days, gentle walking and stretching are enough. Save more intensive movement for your days off.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d4_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">5</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Key Nutrients for Hormones</div>
+      <div class="day-subtitle">Zinc, selenium, Vitamin D, omega-3</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Specific micronutrient deficiencies directly impair hormone production. Nurses are at significant risk due to irregular meals, high stress, and frequent illness exposure.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d5_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Prioritise zinc-rich foods: pumpkin seeds, beef, oysters, chickpeas, cashews.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d5_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Eat 2 Brazil nuts daily for selenium (thyroid support) — do not exceed 4 per day.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d5_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Check your Vitamin D level with your GP. Most people require supplementation (1000–4000 IU/day).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d5_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Add omega-3 rich foods: oily fish 2–3 times this week, or fish oil supplement (2g EPA+DHA/day).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d5_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Reduce refined sugar and ultra-processed foods — they drive insulin spikes, inflammation, and cortisol.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> Meal prepping on days off — even just boiled eggs, mixed nuts, and chopped veg — transforms your nutritional baseline on shift.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d5_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">6</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Stress Response & Adrenal Support</div>
+      <div class="day-subtitle">Parasympathetic activation + adaptogenic herbs</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">Chronic HPA axis activation depletes adrenal reserves, resulting in a flattened cortisol curve, fatigue, and hormonal cascade failure. Adaptogenic herbs have been shown in RCTs to modulate cortisol response.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d6_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Ashwagandha (KSM-66, 300–600mg): shown to reduce cortisol by up to 27.9% in RCTs. Consult GP first.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d6_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Practice 4-7-8 breathing (in 4, hold 7, out 8) for 5 minutes — directly activates the vagus nerve.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d6_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Schedule at least 2 hours of unstructured restorative time today — no obligations, no screens.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d6_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Eat regularly. Skipping meals spikes cortisol. Three balanced meals: protein, fat, complex carbohydrate.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d6_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Limit caffeine to before noon and to maximum 2 cups.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> You cannot pour from an empty cup — and neither can your adrenals. Treating rest as non-negotiable is clinical practice, not self-indulgence.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d6_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-badge" style="background:#C9908C; opacity:0.55;">
+      <span class="d-label">Day</span>
+      <span class="d-num">7</span>
+    </div>
+    <div class="day-info">
+      <div class="day-title">Circadian Reset & Consolidation</div>
+      <div class="day-subtitle">Sustainable hormonal anchoring</div>
+    </div>
+    <div class="day-meta">
+      <span class="day-check-count">0/5</span>
+      <div class="day-chevron">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <path d="M1 1L5 5L9 1" stroke="#8A8A8A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="day-body">
+    <p class="day-overview">The circadian clock governs the timing of virtually every hormone. Shift work creates 'circadian misalignment' — associated with metabolic syndrome, reproductive disruption, and cardiovascular disease.</p>
+    <ul class="checklist"><li class="check-item" data-id="hormonal_d7_c0">
+          <div class="check-box"></div>
+          <span class="check-text">Set consistent sleep and wake times even on days off — the single most powerful circadian anchor.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d7_c1">
+          <div class="check-box"></div>
+          <span class="check-text">Time-restricted eating: all meals within a 10–12 hour window (e.g. 7am–7pm).</span>
+        </li>
+<li class="check-item" data-id="hormonal_d7_c2">
+          <div class="check-box"></div>
+          <span class="check-text">Review Days 1–6: which practices had the most noticeable effect on your energy and mood?</span>
+        </li>
+<li class="check-item" data-id="hormonal_d7_c3">
+          <div class="check-box"></div>
+          <span class="check-text">Create your personalised Hormonal Reset Maintenance Plan — select 3 daily non-negotiables.</span>
+        </li>
+<li class="check-item" data-id="hormonal_d7_c4">
+          <div class="check-box"></div>
+          <span class="check-text">Book a baseline hormone panel with your GP: cortisol, DHEA-S, TSH/T3/T4, Vitamin D, ferritin, B12.</span>
+        </li>
+</ul>
+    <div class="nurse-tip" style="background:#C9908C18; color:#C9908C;">
+      🩺 <b>Nurse Tip:</b> Hormonal rebalancing is not a one-week fix — it is a months-long process. This week gave you the foundation.
+    </div>
+    <div class="journal-label">Today's reflection</div>
+    <textarea class="journal-area" data-id="hormonal_d7_journal"
+      placeholder="How did today's practices feel? What shifted?"></textarea>
+  </div>
+</div>
+<button class="reset-all-btn">Clear all progress</button>
+</div>
+
+</div>
+<script>
+// ── localStorage helpers ──
+const KEY = 'ENJ_hormonal_v1';
+function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+
+// ── State ──
+let state = load();
+
+// ── Init checkboxes ──
+document.querySelectorAll('.check-item').forEach(item => {
+  const id = item.dataset.id;
+  if(state[id]) item.classList.add('done');
+
+  item.addEventListener('click', () => {
+    item.classList.toggle('done');
+    state[id] = item.classList.contains('done');
+    save(state);
+    updateProgress();
+  });
+});
+
+// ── Init journals ──
+document.querySelectorAll('.journal-area').forEach(ta => {
+  const id = ta.dataset.id;
+  if(state[id]) ta.value = state[id];
+  ta.addEventListener('input', () => { state[id] = ta.value; save(state); });
+});
+
+// ── Day accordion ──
+document.querySelectorAll('.day-header').forEach(h => {
+  h.addEventListener('click', () => {
+    const card = h.closest('.day-card');
+    card.classList.toggle('open');
+  });
+});
+
+// ── Open first card by default ──
+const first = document.querySelector('.day-card');
+if(first) first.classList.add('open');
+
+// ── Progress ──
+function updateProgress(){
+  const allBoxes = document.querySelectorAll('.check-item');
+  const done = document.querySelectorAll('.check-item.done').length;
+  const total = allBoxes.length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+
+  // ring
+  const circle = document.querySelector('.progress-circle');
+  if(circle){
+    const r = parseFloat(circle.getAttribute('r'));
+    const circ = 2*Math.PI*r;
+    circle.style.strokeDasharray = circ;
+    circle.style.strokeDashoffset = circ - (circ * pct/100);
+  }
+  const pctEl = document.querySelector('.ring-pct');
+  if(pctEl) pctEl.textContent = pct+'%';
+
+  const doneEl = document.querySelector('.stat-done');
+  if(doneEl) doneEl.textContent = done;
+
+  // per-day counts
+  document.querySelectorAll('.day-card').forEach(card => {
+    const items = card.querySelectorAll('.check-item');
+    const doneD = card.querySelectorAll('.check-item.done').length;
+    const cc = card.querySelector('.day-check-count');
+    if(cc) cc.textContent = doneD+'/'+items.length;
+    // colour day-badge on completion
+    if(doneD === items.length && items.length > 0){
+      card.querySelector('.day-badge').style.opacity = '1';
+    } else {
+      card.querySelector('.day-badge').style.opacity = '0.55';
+    }
+  });
+
+  // completion banner
+  const banner = document.querySelector('.complete-banner');
+  if(banner){ banner.classList.toggle('show', pct===100); }
+}
+updateProgress();
+
+// ── Reset ──
+document.querySelector('.reset-all-btn').addEventListener('click', () => {
+  if(!confirm('Clear all progress for this reset?')) return;
+  document.querySelectorAll('.check-item').forEach(i => i.classList.remove('done'));
+  document.querySelectorAll('.journal-area').forEach(t => t.value='');
+  state = {}; save(state); updateProgress();
+});
+</script>
+<script>
+const canvas = document.getElementById('fluid-bg');
+const ctx = canvas.getContext('2d');
+let W,H,blobs;
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+function initBlobs(){
+  blobs = [
+    {x:W*0.2,y:H*0.3,r:340,dx:0.18,dy:0.12,c:'rgba(201,144,140,0.13)'},
+    {x:W*0.78,y:H*0.25,r:260,dx:-0.13,dy:0.15,c:'rgba(201,144,140,0.09)'},
+    {x:W*0.5,y:H*0.75,r:300,dx:0.10,dy:-0.13,c:'rgba(247,236,235,0.18)'},
+    {x:W*0.85,y:H*0.6,r:200,dx:-0.16,dy:-0.10,c:'rgba(201,144,140,0.07)'},
+  ];
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  blobs.forEach(b=>{
+    const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+    g.addColorStop(0,b.c); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+    b.x+=b.dx; b.y+=b.dy;
+    if(b.x<-b.r||b.x>W+b.r) b.dx*=-1;
+    if(b.y<-b.r||b.y>H+b.r) b.dy*=-1;
+  });
+  requestAnimationFrame(draw);
+}
+window.addEventListener('resize',()=>{resize();initBlobs();});
+resize(); initBlobs(); draw();
+</script>
+</body>
+</html>
