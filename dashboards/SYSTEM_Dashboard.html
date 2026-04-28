@@ -650,6 +650,54 @@
   .color-e1 { color: var(--e1); }
   .color-m1 { color: var(--m1); }
 
+  /* Cloud sync */
+  .sync-pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.45rem 1rem; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; letter-spacing: 0.03em;
+    border: 2px solid var(--e1);
+    background: var(--e1-light); color: var(--e1-dark); cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 1px 6px rgba(111,168,168,0.18);
+  }
+  .sync-pill:hover { background: var(--e1); color: #fff; }
+  .sync-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--e1);
+    flex-shrink: 0; transition: background 0.3s;
+  }
+  .sync-dot.synced { background: var(--y1); }
+  .sync-dot.syncing { background: var(--t1); animation: blink 0.9s infinite; }
+  .sync-dot.error { background: #C0392B; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+  /* Setup modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(44,36,32,0.72);
+    z-index: 10000; display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal-box {
+    background: #fff; border-radius: 20px; padding: 2rem;
+    max-width: 520px; width: 100%; position: relative;
+    box-shadow: 0 8px 40px rgba(44,36,32,0.18);
+  }
+  .modal-step { display: none; }
+  .modal-step.active { display: block; }
+  .firebase-logo { font-size: 2rem; margin-bottom: 0.5rem; }
+  .config-textarea {
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.75rem !important;
+    min-height: 130px;
+    background: #F8F6F3 !important;
+    border: 1.5px solid var(--border) !important;
+  }
+  .config-textarea:focus { border-color: var(--e1) !important; }
+  .setup-rules {
+    background: #F0F9F9; border: 1px solid var(--e1); border-radius: 8px;
+    padding: 0.7rem; font-size: 0.72rem; font-family: monospace;
+    color: var(--e1-dark); white-space: pre; overflow-x: auto;
+    margin: 0.5rem 0 1rem;
+  }
+
   /* Lightbox */
   .lightbox {
     position: fixed; inset: 0;
@@ -695,7 +743,16 @@
 <!-- TOP BAR -->
 <div class="top-bar">
   <span class="date-display" id="dateDisplay"></span>
-  <button class="btn-print" onclick="window.print()">&#128438; Print Dashboard</button>
+  <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+    <div class="sync-pill" id="syncPill" onclick="openSetup()" title="Cloud sync settings">
+      <span class="sync-dot" id="syncDot"></span>
+      <span id="syncLabel">Set up cloud sync</span>
+    </div>
+    <span id="userDisplay" style="font-size:0.78rem;color:var(--muted);display:none;"></span>
+    <button class="btn-print" id="signOutBtn" onclick="doSignOut()" style="display:none;">Sign out</button>
+    <a class="btn-print" href="https://sageeralove-cpu.github.io/elite-nurse-jackie/disclaimer.html?type=paid&name=SYSTEM%20Productivity%20Dashboard%20%C2%B7%20%2415&url=https%3A%2F%2Fbuy.stripe.com%2FeVq28rdImdDu7VW843eIw0e" target="_blank" style="background:var(--s2);border-color:var(--s2);color:#fff;text-decoration:none;font-weight:600;">✦ Buy — $15</a>
+    <button class="btn-print" onclick="window.print()">&#128438; Print</button>
+  </div>
 </div>
 
 <!-- TAB NAVIGATION -->
@@ -1307,13 +1364,256 @@
 
 </div><!-- /content -->
 
+<!-- FIREBASE SETUP MODAL -->
+<div class="modal-overlay hidden" id="setupModal">
+  <div class="modal-box">
+
+    <!-- Step 1: Paste config -->
+    <div class="modal-step active" id="setupStep1">
+      <div class="firebase-logo">☁️</div>
+      <div style="font-size:1.3rem;font-weight:700;color:var(--e1-dark);margin-bottom:0.4rem;">Connect Cloud Sync</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;">Your data will sync instantly across your phone, tablet, and laptop. Paste your Firebase config below — you'll find it in Firebase Console → Project Settings → Your Apps → SDK setup.</div>
+      <div>
+        <label>Firebase Config JSON</label>
+        <textarea class="config-textarea" id="firebaseConfigInput" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "your-project.firebaseapp.com",
+  "projectId": "your-project-id",
+  "storageBucket": "your-project.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abc123"
+}'></textarea>
+      </div>
+      <div id="setupError" style="color:#C0392B;font-size:0.8rem;margin-top:0.5rem;min-height:1.2rem;"></div>
+      <div style="display:flex;gap:0.7rem;margin-top:1rem;flex-wrap:wrap;">
+        <button class="btn btn-teal" onclick="connectFirebase()">Connect Firebase</button>
+        <button class="btn btn-ghost" onclick="closeSetup()">Use offline only</button>
+      </div>
+      <details style="margin-top:1.2rem;">
+        <summary style="font-size:0.78rem;color:var(--muted);cursor:pointer;">Set up Firestore rules (required first time)</summary>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;">In Firebase Console → Firestore → Rules, paste:</div>
+        <div class="setup-rules">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+        &amp;&amp; request.auth.uid == userId;
+    }
+  }
+}</div>
+      </details>
+    </div>
+
+    <!-- Step 2: Sign in -->
+    <div class="modal-step" id="setupStep2">
+      <div class="firebase-logo">🔑</div>
+      <div style="font-size:1.3rem;font-weight:700;color:var(--e1-dark);margin-bottom:0.4rem;">Sign in to sync</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;">Sign in with your Google account so your SYSTEM data syncs to your profile across all your devices.</div>
+      <button class="btn btn-teal" onclick="signInWithGoogle()" style="width:100%;padding:0.75rem;font-size:0.95rem;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:0.6rem;">
+        <span style="font-size:1.2rem;">G</span> Sign in with Google
+      </button>
+      <div style="margin-top:0.8rem;">
+        <button class="btn btn-ghost btn-sm" onclick="closeSetup()">Skip for now</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div class="modal-step" id="setupStep3">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">✅</div>
+      <div style="font-size:1.3rem;font-weight:700;color:var(--y1-dark);margin-bottom:0.4rem;">Cloud sync active!</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;">Your SYSTEM Dashboard is now syncing across all your devices. Open it on your phone and sign in with the same Google account.</div>
+      <div id="syncedUserInfo" style="font-size:0.85rem;background:var(--y1-light);border-radius:8px;padding:0.7rem;color:var(--y1-dark);margin-bottom:1rem;"></div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">📱 On your phone: open the dashboard URL in Chrome → tap the 3 dots → "Add to Home Screen" for an app-like experience.</div>
+      <button class="btn btn-sage" onclick="closeSetup()">Let's go!</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
   <img id="lightboxImg" src="" alt="" />
 </div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
 <script>
+// ===== FIREBASE =====
+let db = null, fbAuth = null, currentUser = null, syncTimer = null;
+
+function setSyncState(state, label) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  if (lbl && label) lbl.textContent = label;
+}
+
+function openSetup() {
+  const modal = document.getElementById('setupModal');
+  modal.classList.remove('hidden');
+  if (currentUser) {
+    showStep(3);
+  } else if (localStorage.getItem('sys_fb_config')) {
+    showStep(2);
+  } else {
+    showStep(1);
+  }
+}
+
+function closeSetup() {
+  document.getElementById('setupModal').classList.add('hidden');
+}
+
+function showStep(n) {
+  ['setupStep1','setupStep2','setupStep3'].forEach((id,i) => {
+    document.getElementById(id).className = 'modal-step' + (i+1 === n ? ' active' : '');
+  });
+}
+
+function connectFirebase() {
+  const raw = document.getElementById('firebaseConfigInput').value.trim();
+  const errEl = document.getElementById('setupError');
+  errEl.textContent = '';
+  let config;
+  try { config = JSON.parse(raw); } catch(e) {
+    errEl.textContent = 'Invalid JSON — check the format and try again.';
+    return;
+  }
+  if (!config.apiKey || !config.projectId) {
+    errEl.textContent = 'Missing apiKey or projectId — please paste the full config.';
+    return;
+  }
+  localStorage.setItem('sys_fb_config', raw);
+  initFirebase(config);
+  showStep(2);
+}
+
+function initFirebase(config) {
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    }
+    db = firebase.firestore();
+    fbAuth = firebase.auth();
+    fbAuth.onAuthStateChanged(user => {
+      currentUser = user;
+      if (user) {
+        setSyncState('syncing', 'Syncing...');
+        document.getElementById('userDisplay').textContent = user.displayName || user.email;
+        document.getElementById('userDisplay').style.display = 'inline';
+        document.getElementById('signOutBtn').style.display = 'inline';
+        loadFromFirestore().then(() => {
+          setSyncState('synced', 'Synced ✓');
+          renderAll();
+        });
+      } else {
+        setSyncState('', 'Sign in to sync');
+        document.getElementById('userDisplay').style.display = 'none';
+        document.getElementById('signOutBtn').style.display = 'none';
+      }
+    });
+  } catch(e) {
+    console.log('Firebase init error:', e);
+    setSyncState('error', 'Sync error');
+  }
+}
+
+function signInWithGoogle() {
+  if (!fbAuth) return;
+  const provider = new firebase.auth.GoogleAuthProvider();
+  fbAuth.signInWithPopup(provider).then(result => {
+    currentUser = result.user;
+    const syncedInfo = document.getElementById('syncedUserInfo');
+    if (syncedInfo) syncedInfo.textContent = 'Signed in as: ' + (result.user.displayName || result.user.email);
+    showStep(3);
+  }).catch(e => {
+    console.log('Sign in error:', e);
+    document.getElementById('setupError') && (document.getElementById('setupError').textContent = 'Sign in failed: ' + e.message);
+  });
+}
+
+function doSignOut() {
+  if (fbAuth) fbAuth.signOut();
+  currentUser = null;
+  setSyncState('', 'Set up cloud sync');
+}
+
+async function syncToFirestore() {
+  if (!db || !currentUser) return;
+  setSyncState('syncing', 'Saving...');
+  try {
+    await db.collection('users').doc(currentUser.uid).set({
+      goals,
+      events,
+      tasks,
+      habits,
+      affirmations,
+      trackNotes,
+      myWhy,
+      intentions,
+      entries: entries.map(e => ({ ...e, photos: [] })),
+      visionCards: visionCards.map(v => ({ ...v, image: '' })),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    setSyncState('synced', 'Synced ✓');
+  } catch(e) {
+    console.log('Firestore save error:', e);
+    setSyncState('error', 'Sync error — saved locally');
+  }
+}
+
+function debouncedSync() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToFirestore, 1200);
+}
+
+async function loadFromFirestore() {
+  if (!db || !currentUser) return;
+  try {
+    const doc = await db.collection('users').doc(currentUser.uid).get();
+    if (!doc.exists) return;
+    const d = doc.data();
+    if (d.goals) goals = d.goals;
+    if (d.events) events = d.events;
+    if (d.tasks) tasks = d.tasks;
+    if (d.habits) habits = d.habits;
+    if (d.affirmations) affirmations = d.affirmations;
+    if (d.trackNotes !== undefined) trackNotes = d.trackNotes;
+    if (d.myWhy !== undefined) myWhy = d.myWhy;
+    if (d.intentions) intentions = d.intentions;
+    if (d.entries) {
+      const localEntries = JSON.parse(localStorage.getItem('sys_entries') || '[]');
+      entries = d.entries.map(e => {
+        const local = localEntries.find(le => le.id === e.id);
+        return { ...e, photos: local ? (local.photos || []) : [] };
+      });
+    }
+    if (d.visionCards) {
+      const localCards = JSON.parse(localStorage.getItem('sys_vision') || '[]');
+      visionCards = d.visionCards.map(v => {
+        const local = localCards.find(lv => lv.id === v.id);
+        return { ...v, image: local ? (local.image || '') : '' };
+      });
+    }
+    saveLocalOnly();
+  } catch(e) { console.log('Firestore load error:', e); }
+}
+
+function renderAll() {
+  renderGoals(); renderTasks(); renderHabits();
+  renderEntries(); renderVisionBoard(); renderAffirmations();
+  renderUpcoming(); updateTaskStats(); updateHabitStats();
+  if (trackNotes) document.getElementById('trackNotes').value = trackNotes;
+  if (myWhy) document.getElementById('myWhy').value = myWhy;
+  if (intentions.start) document.getElementById('intentStart').value = intentions.start;
+  if (intentions.stop) document.getElementById('intentStop').value = intentions.stop;
+  if (intentions.cont) document.getElementById('intentContinue').value = intentions.cont;
+}
+
 // ===== DATA =====
 let goals = [];
 let events = [];
@@ -1348,7 +1648,7 @@ function loadAll() {
   } catch(e) {}
 }
 
-function saveAll() {
+function saveLocalOnly() {
   try {
     localStorage.setItem('sys_goals', JSON.stringify(goals));
     localStorage.setItem('sys_events', JSON.stringify(events));
@@ -1361,6 +1661,11 @@ function saveAll() {
     localStorage.setItem('sys_why', myWhy);
     localStorage.setItem('sys_intentions', JSON.stringify(intentions));
   } catch(e) {}
+}
+
+function saveAll() {
+  saveLocalOnly();
+  debouncedSync();
 }
 
 // ===== INIT =====
@@ -2167,6 +2472,27 @@ function updateMaintainStats() {
 // ===== START =====
 init();
 updateMaintainStats();
+
+// Default Firebase config (pre-connected for this device)
+const _defaultFbConfig = {
+  apiKey: "AIzaSyAxEOgKpbvwVyJcHIOnCS11FvR27K0lhSM",
+  authDomain: "stokkd-app.firebaseapp.com",
+  projectId: "stokkd-app",
+  storageBucket: "stokkd-app.firebasestorage.app",
+  messagingSenderId: "1059240201221",
+  appId: "1:1059240201221:web:77950c0a00601f9632206c",
+  measurementId: "G-S1NSG9HHKS"
+};
+
+// Use saved config (from setup wizard) or fall back to default
+const _rawSaved = localStorage.getItem('sys_fb_config');
+const _configToUse = _rawSaved ? JSON.parse(_rawSaved) : _defaultFbConfig;
+try {
+  initFirebase(_configToUse);
+  setSyncState('syncing', 'Connecting...');
+} catch(e) {
+  setSyncState('', 'Set up cloud sync');
+}
 </script>
 </body>
 </html>
