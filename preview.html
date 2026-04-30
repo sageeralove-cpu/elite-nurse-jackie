@@ -124,18 +124,33 @@
 
     .btn-buy-top:hover { background: #6a9470; transform: translateY(-1px); }
 
-    /* ── iframe ── */
+    /* ── content area ── */
     .iframe-wrap {
       flex: 1;
       position: relative;
       overflow: hidden;
     }
 
-    .iframe-wrap iframe {
+    .iframe-wrap iframe,
+    .iframe-wrap embed {
       width: 100%;
       height: 100%;
       border: none;
+      display: block;
     }
+
+    /* Blur overlay — works for both iframe and embed */
+    .blur-overlay {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(250,250,245,0.35);
+      z-index: 5;
+      display: none;
+      pointer-events: none;
+    }
+    .blur-overlay.active { display: block; }
 
     /* ── Overlay modal ── */
     .modal-overlay {
@@ -324,9 +339,10 @@
     </div>
   </div>
 
-  <!-- Dashboard iframe -->
-  <div class="iframe-wrap">
-    <iframe id="dashFrame" src="" title="Dashboard Preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+  <!-- Dashboard / Tracker content -->
+  <div class="iframe-wrap" id="contentWrap">
+    <!-- injected by JS based on product type -->
+    <div class="blur-overlay" id="blurOverlay"></div>
   </div>
 
   <!-- Purchase modal -->
@@ -465,8 +481,24 @@
   document.getElementById('purchaseBtn').href        = product.stripeUrl;
   document.getElementById('buyTopBtn').addEventListener('click', showModal);
 
-  // Load iframe
-  document.getElementById('dashFrame').src = product.iframe;
+  // Load content — embed for PDFs, sandboxed iframe for HTML dashboards
+  const wrap = document.getElementById('contentWrap');
+  const blurOverlay = document.getElementById('blurOverlay');
+  let contentEl;
+
+  if (product.iframe.endsWith('.pdf')) {
+    contentEl = document.createElement('embed');
+    contentEl.setAttribute('src', product.iframe + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH');
+    contentEl.setAttribute('type', 'application/pdf');
+  } else {
+    contentEl = document.createElement('iframe');
+    contentEl.setAttribute('src', product.iframe);
+    contentEl.setAttribute('title', 'Dashboard Preview');
+    contentEl.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+  }
+  contentEl.id = 'dashFrame';
+  // Insert before the blur overlay so overlay sits on top
+  wrap.insertBefore(contentEl, blurOverlay);
 
   // ─────────────────────────────────────────────────────────────
   // Countdown timer
@@ -497,9 +529,10 @@
   // ─────────────────────────────────────────────────────────────
   function showModal() {
     document.getElementById('modalOverlay').classList.add('visible');
-    // Blur the iframe so the dashboard is visible but unusable
-    document.getElementById('dashFrame').style.filter = 'blur(6px)';
-    document.getElementById('dashFrame').style.pointerEvents = 'none';
+    // Blur overlay works for both iframe and embed
+    document.getElementById('blurOverlay').classList.add('active');
+    const frame = document.getElementById('dashFrame');
+    if (frame) frame.style.pointerEvents = 'none';
   }
 
   // No backdrop click-to-close — modal is permanent once shown
