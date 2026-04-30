@@ -79,6 +79,16 @@
       flex-shrink: 0;
     }
 
+    .bookmark-hint {
+      font-size: 10px;
+      color: var(--warm-gray);
+      white-space: nowrap;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+    .bookmark-hint:hover { color: var(--accent); }
+
     .timer-wrap {
       display: flex;
       flex-direction: column;
@@ -314,6 +324,7 @@
       <span class="product-title" id="bannerTitle"></span>
     </div>
     <div class="banner-right">
+      <span class="bookmark-hint" id="bookmarkHint" title="Bookmark this page to preview anytime">📌 Save preview</span>
       <div class="timer-wrap" id="timerWrap">
         <span class="timer-label" id="timerLabel">Preview ends in 8s</span>
         <div class="timer-bar-bg">
@@ -350,6 +361,7 @@
 
       <a class="btn-purchase" id="purchaseBtn" href="#">I Understand — Purchase Now →</a>
       <button class="btn-keep-previewing" id="keepPreviewingBtn">← Keep Previewing</button>
+      <p class="modal-footer" style="margin-bottom:10px;">📌 <strong>Want to come back?</strong> Bookmark this page — you can preview for free anytime. Purchase to get your own file to use offline, forever.</p>
       <p class="modal-footer">© 2026 Sage Era Pty Ltd · Jackie Douma RN<br>Questions? sage.era.love@gmail.com</p>
     </div>
   </div>
@@ -472,6 +484,23 @@
     if (e.target === document.getElementById('modalOverlay')) {
       document.getElementById('modalOverlay').classList.remove('visible');
     }
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // Bookmark hint — shows browser tip on click
+  // ─────────────────────────────────────────────────────────────
+  document.getElementById('bookmarkHint').addEventListener('click', () => {
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    let msg;
+    if (isIOS) {
+      msg = '📌 To save this dashboard:\nTap the Share button (⬆) at the bottom of Safari, then tap "Add to Home Screen" to access it anytime — no purchase needed!';
+    } else if (isMac) {
+      msg = '📌 To bookmark this dashboard:\nPress ⌘ + D to save it to your bookmarks and come back to preview anytime — no purchase needed!';
+    } else {
+      msg = '📌 To bookmark this dashboard:\nPress Ctrl + D to save it to your bookmarks and come back to preview anytime — no purchase needed!';
+    }
+    alert(msg);
   });
 </script>
 </body>
