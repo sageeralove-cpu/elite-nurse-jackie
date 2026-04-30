@@ -21,8 +21,14 @@ fi
 git config user.email "jax5635@gmail.com"
 git config user.name "Jackie Douma"
 
+# Remove stale lock files if they exist
+rm -f .git/HEAD.lock .git/index.lock
+
+# Pull latest from GitHub first to avoid conflicts
+git pull origin main --rebase --allow-unrelated-histories || true
+
 git add .
-git commit -m "Add thank-you download page for automatic Stripe delivery"
+git commit -m "Update preview page, PDFs and dashboard files" || echo "Nothing new to commit."
 git branch -M main
 git push -u origin main
 
